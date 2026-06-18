@@ -243,9 +243,9 @@ try:
     s.dpad_up_direction = -1
     s.dpad_down_direction = 1
     s.invert_left_x = False
-    s.invert_left_y = True
-    s.invert_right_x = True
-    s.invert_right_y = True
+    s.invert_left_y = False
+    s.invert_right_x = False
+    s.invert_right_y = False
     s.joystick_invert_mode = 0
     bpy.ops.dfr.create_rig()
     ok = lab.start_controller_flight(bpy.context)

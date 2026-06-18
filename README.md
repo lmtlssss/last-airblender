@@ -25,7 +25,7 @@ sh install.sh
 Pin a version:
 
 ```bash
-LAST_AIRBLENDER_VERSION=v0.1.0 sh install.sh
+LAST_AIRBLENDER_VERSION=v0.1.1 sh install.sh
 ```
 
 ### Windows PowerShell

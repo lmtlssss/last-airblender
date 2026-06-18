@@ -945,10 +945,10 @@ class DroneFlightSettings(bpy.types.PropertyGroup):
     dpad_right_direction: bpy.props.IntProperty(name="D-pad Right Direction", default=1, min=-1, max=1)
     record_scrub_frames_per_tick: bpy.props.IntProperty(name="Record Rewind/Fwd Frames", default=2, min=1, max=24)
 
-    invert_left_y: bpy.props.BoolProperty(name="Invert Left Y", default=True)
-    invert_right_y: bpy.props.BoolProperty(name="Invert Right Y", default=True)
+    invert_left_y: bpy.props.BoolProperty(name="Invert Left Y", default=False)
+    invert_right_y: bpy.props.BoolProperty(name="Invert Right Y", default=False)
     invert_left_x: bpy.props.BoolProperty(name="Invert Left X", default=False)
-    invert_right_x: bpy.props.BoolProperty(name="Invert Right X", default=True)
+    invert_right_x: bpy.props.BoolProperty(name="Invert Right X", default=False)
 
     button_a: bpy.props.IntProperty(name="Button A", default=0, min=0, max=63)
     button_b: bpy.props.IntProperty(name="Button B", default=1, min=0, max=63)
