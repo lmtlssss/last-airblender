@@ -3,9 +3,19 @@ from pathlib import Path
 import bpy
 ADDON_DIR = Path(__file__).resolve().parents[2] / 'addon'
 sys.path.insert(0, str(ADDON_DIR))
+if 'last_airblender' in sys.modules:
+    try:
+        sys.modules['last_airblender'].unregister()
+    except Exception:
+        pass
+    del sys.modules['last_airblender']
 import last_airblender as d
-if not hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
-    d.register()
+if hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
+    try:
+        d.unregister()
+    except Exception:
+        pass
+d.register()
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
 cam_data=bpy.data.cameras.new('Smoke_Cam_Data'); cam=bpy.data.objects.new('Smoke_Cam', cam_data)
 bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam
@@ -16,7 +26,7 @@ root.mkdir(parents=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(root/'smoke_project.blend'))
 folder=d._drone_screenshot_base_dir(bpy.context.scene)
 print('SCREENSHOT_FOLDER', folder)
-assert folder == str(root/'drone_flight_recorder_screenshots')
+assert folder == str(root/'last_airblender_screenshots')
 path=d._capture_drone_screenshot(bpy.context.scene)
 print('SCREENSHOT_PATH', path)
 assert path.startswith(folder + os.sep)

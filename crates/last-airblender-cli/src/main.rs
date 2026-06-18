@@ -10,9 +10,13 @@ use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const ADDON: &str = include_str!("../../../addon/last_airblender.py");
+const STARTUP_FILE: &str = "last_airblender_startup.py";
 const ADDON_MODULE: &str = "last_airblender";
 const ADDON_FILE: &str = "last_airblender.py";
 const BRIDGE_ADDR: &str = "127.0.0.1:8765";
+const SUPPORTED_BLENDER_VERSIONS: &[&str] = &[
+    "3.6", "4.0", "4.1", "4.2", "4.3", "4.4", "4.5", "5.0", "5.1", "5.2",
+];
 
 #[derive(Parser)]
 #[command(
@@ -56,6 +60,7 @@ struct Packet {
     lb: bool,
     rb: bool,
     select: bool,
+    start: bool,
     dpad_x: i8,
     dpad_y: i8,
     timestamp_ms: u128,
@@ -112,6 +117,11 @@ fn addon_dirs() -> Vec<PathBuf> {
             }
         }
     }
+    for root in blender_user_roots() {
+        for v in SUPPORTED_BLENDER_VERSIONS {
+            out.push(root.join(v).join("scripts/addons"));
+        }
+    }
     if out.is_empty() {
         if cfg!(target_os = "windows") {
             if let Some(appdata) = std::env::var_os("APPDATA") {
@@ -132,6 +142,88 @@ fn addon_dirs() -> Vec<PathBuf> {
     out
 }
 
+fn startup_dirs() -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    for root in blender_user_roots() {
+        if let Ok(entries) = fs::read_dir(&root) {
+            for e in entries.flatten() {
+                let p = e.path();
+                if p.is_dir() {
+                    out.push(p.join("scripts/startup"));
+                }
+            }
+        }
+    }
+    for root in blender_user_roots() {
+        for v in SUPPORTED_BLENDER_VERSIONS {
+            out.push(root.join(v).join("scripts/startup"));
+        }
+    }
+    if out.is_empty() {
+        if cfg!(target_os = "windows") {
+            if let Some(appdata) = std::env::var_os("APPDATA") {
+                for v in SUPPORTED_BLENDER_VERSIONS {
+                    out.push(
+                        PathBuf::from(&appdata)
+                            .join(format!("Blender Foundation/Blender/{v}/scripts/startup")),
+                    );
+                }
+            }
+        } else if cfg!(target_os = "macos") {
+            if let Some(home) = dirs::home_dir() {
+                for v in SUPPORTED_BLENDER_VERSIONS {
+                    out.push(home.join(format!(
+                        "Library/Application Support/Blender/{v}/scripts/startup"
+                    )));
+                }
+            }
+        } else if let Some(home) = dirs::home_dir() {
+            for v in SUPPORTED_BLENDER_VERSIONS {
+                out.push(home.join(format!(".config/blender/{v}/scripts/startup")));
+            }
+        }
+    }
+    out.sort();
+    out.dedup();
+    out
+}
+
+fn startup_bootstrap() -> String {
+    format!(
+        r#"# Auto-installed by The Last AirBlender. Safe if the add-on is missing.
+import os, sys, bpy, addon_utils, traceback
+
+_LAB_BOOTED = False
+
+def _lab_boot():
+    global _LAB_BOOTED
+    if _LAB_BOOTED:
+        return
+    try:
+        here = os.path.dirname(__file__)
+        addons = os.path.abspath(os.path.join(here, '..', 'addons'))
+        if addons not in sys.path:
+            sys.path.insert(0, addons)
+        if not hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
+            addon_utils.enable('{ADDON_MODULE}', default_set=True, persistent=True)
+        import {ADDON_MODULE} as lab
+        if hasattr(lab, 'ensure_icon_runtime'):
+            lab.ensure_icon_runtime()
+        _LAB_BOOTED = True
+    except Exception:
+        traceback.print_exc()
+
+def register():
+    _lab_boot()
+
+def unregister():
+    pass
+
+_lab_boot()
+"#
+    )
+}
+
 fn install_addon() -> Result<()> {
     let dirs = addon_dirs();
     if dirs.is_empty() {
@@ -143,12 +235,26 @@ fn install_addon() -> Result<()> {
         fs::write(&dst, ADDON).with_context(|| format!("writing {}", dst.display()))?;
         println!("installed {}", dst.display());
     }
+    for dir in startup_dirs() {
+        fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
+        let dst = dir.join(STARTUP_FILE);
+        fs::write(&dst, startup_bootstrap())
+            .with_context(|| format!("writing {}", dst.display()))?;
+        println!("installed {}", dst.display());
+    }
     Ok(())
 }
 
 fn uninstall_addon() -> Result<()> {
     for dir in addon_dirs() {
         let dst = dir.join(ADDON_FILE);
+        if dst.exists() {
+            fs::remove_file(&dst).with_context(|| format!("removing {}", dst.display()))?;
+            println!("removed {}", dst.display());
+        }
+    }
+    for dir in startup_dirs() {
+        let dst = dir.join(STARTUP_FILE);
         if dst.exists() {
             fs::remove_file(&dst).with_context(|| format!("removing {}", dst.display()))?;
             println!("removed {}", dst.display());
@@ -305,6 +411,7 @@ fn first_gamepad_packet(gilrs: &Gilrs) -> Option<Packet> {
         lb: gp.is_pressed(Button::LeftTrigger),
         rb: gp.is_pressed(Button::RightTrigger),
         select: gp.is_pressed(Button::Select),
+        start: gp.is_pressed(Button::Start),
         dpad_x,
         dpad_y,
         timestamp_ms: SystemTime::now()
@@ -329,6 +436,11 @@ fn doctor() -> Result<()> {
     println!("add-on dirs:");
     for d in &dirs {
         let installed = d.join(ADDON_FILE).exists();
+        println!("{} {}", if installed { "✓" } else { "-" }, d.display());
+    }
+    println!("startup runtimes:");
+    for d in startup_dirs() {
+        let installed = d.join(STARTUP_FILE).exists();
         println!("{} {}", if installed { "✓" } else { "-" }, d.display());
     }
     match Gilrs::new() {

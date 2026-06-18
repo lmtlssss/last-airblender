@@ -4,9 +4,19 @@ import bpy
 from mathutils import Vector
 ADDON_DIR = Path(__file__).resolve().parents[2] / 'addon'
 sys.path.insert(0, str(ADDON_DIR))
+if 'last_airblender' in sys.modules:
+    try:
+        sys.modules['last_airblender'].unregister()
+    except Exception:
+        pass
+    del sys.modules['last_airblender']
 import last_airblender as d
-if not hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
-    d.register()
+if hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
+    try:
+        d.unregister()
+    except Exception:
+        pass
+d.register()
 # clean
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
 for action in list(bpy.data.actions):

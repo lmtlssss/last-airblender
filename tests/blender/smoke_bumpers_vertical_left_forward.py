@@ -4,9 +4,19 @@ import bpy
 from mathutils import Vector
 ADDON_DIR = Path(__file__).resolve().parents[2] / 'addon'
 sys.path.insert(0, str(ADDON_DIR))
+if 'last_airblender' in sys.modules:
+    try:
+        sys.modules['last_airblender'].unregister()
+    except Exception:
+        pass
+    del sys.modules['last_airblender']
 import last_airblender as d
-if not hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
-    d.register()
+if hasattr(bpy.types.Scene, 'drone_flight_recorder_settings'):
+    try:
+        d.unregister()
+    except Exception:
+        pass
+d.register()
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
 cam_data=bpy.data.cameras.new('Smoke_Cam_Data'); cam=bpy.data.objects.new('Smoke_Cam', cam_data)
 bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam; bpy.context.view_layer.update()
@@ -39,8 +49,8 @@ reset(); fb.buttons[s.button_rb]=True; tick(); rb=rig.location.copy(); print('RB
 reset(); fb.buttons[s.button_lb]=True; tick(); lb=rig.location.copy(); print('LB_LOC', tuple(round(v,4) for v in lb)); assert lb.z < -0.01 and abs(lb.x) < 1e-6 and abs(lb.y) < 1e-6
 # Left stick Y is now forward/back along view, not vertical.
 reset(); view_vec=( (roll or gimbal).matrix_world.to_quaternion() @ Vector((0,0,-1)) ).normalized(); fb.axes[s.axis_left_y] = -1.0; tick(); fwd=rig.location.copy(); print('LEFTY_UP_LOC', tuple(round(v,4) for v in fwd), 'VIEW', tuple(round(v,4) for v in view_vec)); assert fwd.length > 0.01 and abs(fwd.normalized().dot(view_vec)) > 0.99
-# Y invert should not affect left stick Y anymore.
-normal=fwd.copy(); reset(); s.joystick_invert_mode=1; fb.axes[s.axis_left_y] = -1.0; tick(); inv=rig.location.copy(); print('LEFTY_INVERT_LOC', tuple(round(v,4) for v in inv)); assert (normal - inv).length < 1e-6
+# Y is now a global invert toggle, so left stick Y reverses too.
+normal=fwd.copy(); reset(); s.joystick_invert_mode=1; fb.axes[s.axis_left_y] = -1.0; tick(); inv=rig.location.copy(); print('LEFTY_INVERT_LOC', tuple(round(v,4) for v in inv)); assert normal.dot(inv) < -0.01
 # Left X still strafes.
 reset(); fb.axes[s.axis_left_x]=1.0; tick(); strafe=rig.location.copy(); print('LEFTX_LOC', tuple(round(v,4) for v in strafe)); assert abs(strafe.x) > 0.01 and abs(strafe.z) < 1e-6
 # Automove RB level 1 also rises.

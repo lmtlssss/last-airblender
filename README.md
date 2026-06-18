@@ -25,7 +25,7 @@ sh install.sh
 Pin a version:
 
 ```bash
-LAST_AIRBLENDER_VERSION=v0.1.2 sh install.sh
+LAST_AIRBLENDER_VERSION=v1.0.0 sh install.sh
 ```
 
 ### Windows PowerShell
@@ -54,17 +54,27 @@ Download the latest native installer from GitHub Releases:
 
 ## Quick start
 
+### Normal no-terminal Blender runtime
+
+After install, open Blender normally. A small translucent controller icon appears in the 3D viewport.
+
+- **Left-click the controller icon**: activate The Last AirBlender, create/attach the AirBlender camera rig, and switch to the split camera/third-person layout.
+- **Right-click the controller icon**: show the native controls menu.
+- No terminal or background CLI is required for normal Blender use on systems where Blender can read the controller directly.
+
+The CLI is still useful for install, doctor, packaging, and optional bridge fallback:
+
 ```bash
 last-airblender doctor
-last-airblender launch your-scene.blend
+last-airblender launch your-scene.blend   # optional bridge launcher
 ```
-
-Then pick up the controller.
 
 ## Baked controls
 
 | Control | Action |
 |---|---|
+| Start/Menu | Cycle available AirBlender/scene cameras |
+| Start/Menu double-tap | Create a new `AirBlender_Cam_###` at the current flown/view transform |
 | Left stick X | Strafe left/right |
 | Left stick Y | Move forward/back along camera view |
 | Right stick | Viewport-locked look |
@@ -84,21 +94,35 @@ No remapping is required for normal use.
 
 ## Recording workflow
 
-1. Launch with `last-airblender launch scene.blend`.
-2. Fly until it feels right.
-3. Press **D-pad Down** to start recording.
-4. Fly the shot.
-5. Press **D-pad Down** again to stop.
-6. Use **D-pad Left/Right** to scrub the active take.
-7. If you scrub back and press **D-pad Down**, the future is trimmed and recording overwrites from that frame.
+1. Open Blender normally and click the floating controller icon.
+2. Use **Start/Menu double-tap** to create cameras, or **Start/Menu single tap** to cycle existing cameras.
+3. Fly until it feels right.
+4. Press **D-pad Down** to start recording.
+5. Fly the shot.
+6. Press **D-pad Down** again to stop.
+7. Use **D-pad Left/Right** to scrub the active take.
+8. If you scrub back and press **D-pad Down**, the future is trimmed and recording overwrites from that frame.
 
 ## Screenshots
 
 D-pad Up saves a camera-perspective PNG beside the saved project:
 
 ```text
-<your-blend-folder>/drone_flight_recorder_screenshots/
+<your-blend-folder>/last_airblender_screenshots/
 ```
+
+## Naming and compatibility
+
+v1.0 uses canonical AirBlender names for new helpers:
+
+- `AirBlender_Camera_Fleet`
+- `AirBlender_Airframe`
+- `AirBlender_Gimbal`
+- `AirBlender_Horizon`
+- `AirBlender_Cam_###`
+- `LAB_*` actions and markers
+
+Older scenes using `Drone_Rig`, `Drone_Gimbal`, `Drone_Roll`, or `DFR_*` actions/markers remain supported for compatibility.
 
 ## Troubleshooting
 
@@ -111,7 +135,7 @@ Common issues:
 - **Blender not found**: set `BLENDER=/path/to/blender`.
 - **Controller not detected**: plug in an Xbox-compatible controller and rerun `doctor`.
 - **Linux permissions**: install package normally and ensure your user can access game controllers.
-- **Windows SmartScreen/macOS Gatekeeper**: v0.1.0 packages may be unsigned; use the inspect-first install path if preferred.
+- **Windows SmartScreen/macOS Gatekeeper**: v1.0.0 packages may be unsigned; use the inspect-first install path if preferred.
 
 ## Developer build
 

@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="The Last AirBlender" Manufacturer="lmtlssss" Version="0.1.2" UpgradeCode="7df5687a-14a1-4de6-877a-5d00a3b916e8">
+  <Package Name="The Last AirBlender" Manufacturer="lmtlssss" Version="1.0.0" UpgradeCode="7df5687a-14a1-4de6-877a-5d00a3b916e8">
     <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
     <MediaTemplate EmbedCab="yes" />
     <Feature Id="Main" Title="The Last AirBlender" Level="1">

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION="${VERSION:-0.1.2}"
+VERSION="${VERSION:-1.0.0}"
 ARCH_ASSET="${ARCH_ASSET:-$(uname -m)}"
 BIN="$ROOT/target/release/last-airblender"
 [ -x "$BIN" ] || cargo build --release

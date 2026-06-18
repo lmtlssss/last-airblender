@@ -1,6 +1,6 @@
 [package]
 name = "last-airblender"
-version = "0.1.2"
+version = "1.0.0"
 edition = "2021"
 description = "Installer, launcher, and controller bridge for The Last AirBlender Blender add-on"
 license = "MIT"
