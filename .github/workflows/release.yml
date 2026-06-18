@@ -15,11 +15,15 @@ jobs:
       - run: scripts/package-deb.sh
       - run: scripts/package-rpm.sh
       - run: scripts/package-addon.sh
-      - run: tar -C target/release -czf dist/last-airblender_x86_64.tar.gz last-airblender
+      - run: tar -C target/release -czf dist/last-airblender_linux_x86_64.tar.gz last-airblender
       - uses: actions/upload-artifact@v4
         with:
           name: linux-assets
-          path: dist/*
+          path: |
+            dist/*.deb
+            dist/*.rpm
+            dist/*linux*.tar.gz
+            dist/*addon*.zip
   windows:
     runs-on: windows-latest
     steps:
@@ -29,19 +33,29 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-assets
-          path: dist/*
+          path: dist/*.msi
   macos:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs_on: macos-13
+            arch_asset: x86_64
+          - runs_on: macos-14
+            arch_asset: arm64
+    runs-on: ${{ matrix.runs_on }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --release
-      - run: scripts/package-macos-pkg.sh
-      - run: tar -C target/release -czf dist/last-airblender_$(uname -m).tar.gz last-airblender
+      - run: ARCH_ASSET=${{ matrix.arch_asset }} scripts/package-macos-pkg.sh
+      - run: tar -C target/release -czf dist/last-airblender_macos_${{ matrix.arch_asset }}.tar.gz last-airblender
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-assets
-          path: dist/*
+          name: macos-${{ matrix.arch_asset }}-assets
+          path: |
+            dist/*.pkg
+            dist/*macos*.tar.gz
   publish:
     runs-on: ubuntu-latest
     needs: [linux, windows, macos]

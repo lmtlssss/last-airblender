@@ -25,7 +25,7 @@ if [ "$os" = "linux" ]; then
     asset="last-airblender_${arch}.rpm"
     installer="sudo rpm -Uvh"
   else
-    asset="last-airblender_${arch}.tar.gz"
+    asset="last-airblender_linux_${arch}.tar.gz"
     installer="tarball"
   fi
 elif [ "$os" = "darwin" ]; then
