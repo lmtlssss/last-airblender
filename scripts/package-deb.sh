@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION="${VERSION:-1.0.1}"
+VERSION="${VERSION:-1.0.2}"
 ARCH_DEB="${ARCH_DEB:-amd64}"
 ARCH_ASSET="${ARCH_ASSET:-x86_64}"
 BIN="$ROOT/target/release/last-airblender"

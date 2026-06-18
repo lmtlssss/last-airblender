@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.2
+
+- Fixed Linux autosense sessions where a stale UDP bridge could outrank the real `/dev/input/js*` controller, leaving the AirBlender icon/status armed while physical buttons such as Start did nothing. Native Linux joystick input now wins whenever Blender can see it.
+
 ## v1.0.1
 
 - Hotfix: autosense Xbox-compatible controllers from Blender startup and auto-arm AirBlender without clicking the icon.

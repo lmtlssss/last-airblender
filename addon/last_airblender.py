@@ -1,7 +1,7 @@
 bl_info = {
     "name": "The Last AirBlender",
     "author": "Codex",
-    "version": (1, 0, 1),
+    "version": (1, 0, 2),
     "blender": (4, 0, 0),
     "location": "View3D > Sidebar > The Last AirBlender",
     "description": "Fly Blender cameras with an Xbox-style controller and record cinematic camera takes.",
@@ -251,7 +251,13 @@ class BridgeJoystickBackend:
 
 
 class HybridJoystickBackend:
-    """Prefer Rust bridge packets; fall back to Linux /dev/input/js* when available."""
+    """Use the native Linux joystick when Blender can see it.
+
+    The Rust/UDP bridge exists for platforms where Blender cannot read the
+    controller directly. On Linux, a visible /dev/input/js* device is the most
+    truthful backend and must win; otherwise a stale bridge socket can make the
+    icon look armed while real controller buttons never reach Blender.
+    """
 
     def __init__(self):
         self.bridge = BridgeJoystickBackend()
@@ -280,10 +286,10 @@ class HybridJoystickBackend:
         self.connected = False
 
     def _sync_status(self):
-        if self.bridge.connected:
-            self.active = self.bridge
-        elif self.linux.connected:
+        if self.linux.connected:
             self.active = self.linux
+        elif self.bridge.connected:
+            self.active = self.bridge
         elif self.bridge.sock is not None:
             self.active = self.bridge
         self.path = getattr(self.active, "path", "") if self.active else ""

@@ -25,7 +25,7 @@ sh install.sh
 Pin a version:
 
 ```bash
-LAST_AIRBLENDER_VERSION=v1.0.1 sh install.sh
+LAST_AIRBLENDER_VERSION=v1.0.2 sh install.sh
 ```
 
 ### Windows PowerShell
@@ -136,7 +136,7 @@ Common issues:
 - **Blender not found**: set `BLENDER=/path/to/blender`.
 - **Controller not detected**: plug in an Xbox-compatible controller and rerun `doctor`.
 - **Linux permissions**: install package normally and ensure your user can access game controllers.
-- **Windows SmartScreen/macOS Gatekeeper**: v1.0.1 packages may be unsigned; use the inspect-first install path if preferred.
+- **Windows SmartScreen/macOS Gatekeeper**: v1.0.2 packages may be unsigned; use the inspect-first install path if preferred.
 
 ## Developer build
 
