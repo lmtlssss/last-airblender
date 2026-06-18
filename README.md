@@ -25,7 +25,7 @@ sh install.sh
 Pin a version:
 
 ```bash
-LAST_AIRBLENDER_VERSION=v1.0.3 sh install.sh
+LAST_AIRBLENDER_VERSION=v1.0.4 sh install.sh
 ```
 
 ### Windows PowerShell
@@ -76,6 +76,7 @@ last-airblender launch your-scene.blend   # optional bridge launcher
 |---|---|
 | Start/Menu | Cycle available AirBlender/scene cameras |
 | Start/Menu double-tap | Create a new `AirBlender_Cam_###` at the current flown/view transform |
+| Start/Menu triple-tap | Delete the current camera and stay armed on the next usable camera |
 | Left stick X | Strafe left/right |
 | Left stick Y | Move forward/back along camera view |
 | Right stick | Viewport-locked look |
@@ -83,20 +84,24 @@ last-airblender launch your-scene.blend   # optional bridge launcher
 | RB / LB double-tap | Auto rise/fall |
 | RB / LB tap while auto | Reverse auto direction |
 | RT / LT | Camera roll |
+| L3 + RT/LT | Camera focal length |
 | X | Low / medium / high / xhigh speed |
-| Y | Global invert toggle: both sticks + roll direction |
-| A | First/third-person view toggle |
+| Y | Invert right stick + trigger roll + bumper rise/fall direction |
+| A | Show/hide controls overlay |
+| B | Toggle third-person side pane |
+| R3 | Toggle camera portrait/landscape |
 | D-pad Up | Camera screenshot |
 | D-pad Down | Record / stop / overwrite from scrubbed frame |
 | D-pad Left/Right | Scrub active take backward/forward |
 | Select / Back | Cycle take slots 1-10 |
+| Select / Back double-tap | Jump to a new/empty take slot |
 
 No remapping is required for normal use.
 
 ## Recording workflow
 
 1. Open Blender normally with the controller plugged in; AirBlender autosenses it and arms itself.
-2. Use **Start/Menu double-tap** to create cameras, or **Start/Menu single tap** to cycle existing cameras.
+2. Use **Start/Menu double-tap** to create cameras, **single tap** to cycle existing cameras, or **triple tap** to delete the current camera.
 3. Fly until it feels right.
 4. Press **D-pad Down** to start recording.
 5. Fly the shot.
@@ -136,7 +141,7 @@ Common issues:
 - **Blender not found**: set `BLENDER=/path/to/blender`.
 - **Controller not detected**: plug in an Xbox-compatible controller and rerun `doctor`.
 - **Linux permissions**: install package normally and ensure your user can access game controllers.
-- **Windows SmartScreen/macOS Gatekeeper**: v1.0.3 packages may be unsigned; use the inspect-first install path if preferred.
+- **Windows SmartScreen/macOS Gatekeeper**: v1.0.4 packages may be unsigned; use the inspect-first install path if preferred.
 
 ## Developer build
 

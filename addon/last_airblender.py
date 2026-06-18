@@ -1,7 +1,7 @@
 bl_info = {
     "name": "The Last AirBlender",
     "author": "Codex",
-    "version": (1, 0, 3),
+    "version": (1, 0, 4),
     "blender": (4, 0, 0),
     "location": "View3D > Sidebar > The Last AirBlender",
     "description": "Fly Blender cameras with an Xbox-style controller and record cinematic camera takes.",
@@ -352,6 +352,8 @@ class DroneRuntime:
         self.last_start_tap = -999.0
         self.pending_start_single = False
         self.pending_start_time = 0.0
+        self.start_tap_count = 0
+        self.pending_start_action = 0
         self.last_select_tap = -999.0
         self.pending_select_single = False
         self.pending_select_time = 0.0
@@ -1353,30 +1355,87 @@ def switch_airblender_camera(scene, direction=1, context=None):
     return cam
 
 
+def _remove_camera_object(cam):
+    if not cam or cam.name not in bpy.data.objects:
+        return
+    cam_data = cam.data
+    bpy.data.objects.remove(cam, do_unlink=True)
+    if cam_data and cam_data.users == 0:
+        bpy.data.cameras.remove(cam_data)
+
+
+def delete_current_airblender_camera(scene, context=None):
+    """Delete the current camera, then keep AirBlender armed on a usable camera."""
+    context = context or bpy.context
+    current = scene.camera
+    if not current or current.type != "CAMERA":
+        cam = switch_airblender_camera(scene, 1, context)
+        if cam:
+            scene.drone_flight_recorder_settings.status = "No active camera deleted; using %s" % cam.name
+        return cam
+
+    current_name = current.name
+    current["lab_camera"] = True
+    cams = lab_cameras(scene)
+    if current not in cams:
+        cams.append(current)
+    if len(cams) <= 1:
+        # Never leave the scene uncamerad: clone the current flown view first,
+        # then remove the old object/data. The user still gets a delete gesture,
+        # while AirBlender remains immediately flyable.
+        replacement = create_airblender_camera(scene, context)
+        _remove_camera_object(current)
+        scene.drone_flight_recorder_settings.status = "Deleted %s; created %s" % (current_name, replacement.name)
+        return replacement
+
+    replacement = switch_airblender_camera(scene, 1, context)
+    _remove_camera_object(current)
+    remaining = len(lab_cameras(scene))
+    scene.drone_flight_recorder_settings.status = "Deleted %s; camera %s (%d left)" % (current_name, replacement.name if replacement else "ready", remaining)
+    return replacement
+
+
+def _reset_start_tap_sequence():
+    RUNTIME.pending_start_single = False
+    RUNTIME.pending_start_action = 0
+    RUNTIME.start_tap_count = 0
+    RUNTIME.last_start_tap = -999.0
+    RUNTIME.pending_start_time = 0.0
+
+
 def handle_start_button_edge(scene, now):
     s = scene.drone_flight_recorder_settings
     if s.recording:
         s.status = "Finish recording before switching cameras"
-        RUNTIME.pending_start_single = False
+        _reset_start_tap_sequence()
         return
     window = max(0.05, float(s.start_double_tap_window))
     if (now - RUNTIME.last_start_tap) <= window:
-        RUNTIME.pending_start_single = False
-        RUNTIME.last_start_tap = -999.0
-        create_airblender_camera(scene, bpy.context)
+        RUNTIME.start_tap_count += 1
     else:
-        RUNTIME.pending_start_single = True
-        RUNTIME.pending_start_time = now
-        RUNTIME.last_start_tap = now
+        RUNTIME.start_tap_count = 1
+    RUNTIME.last_start_tap = now
+    RUNTIME.pending_start_time = now
+    RUNTIME.pending_start_action = min(int(RUNTIME.start_tap_count), 3)
+    RUNTIME.pending_start_single = True
+    if RUNTIME.start_tap_count >= 3:
+        _reset_start_tap_sequence()
+        delete_current_airblender_camera(scene, bpy.context)
 
 
 def process_pending_start_single(scene, now):
     if not RUNTIME.pending_start_single:
         return
     window = max(0.05, float(scene.drone_flight_recorder_settings.start_double_tap_window))
-    if (now - RUNTIME.pending_start_time) >= window:
-        RUNTIME.pending_start_single = False
-        switch_airblender_camera(scene, 1, bpy.context)
+    if (now - RUNTIME.last_start_tap) >= window:
+        action = int(getattr(RUNTIME, "pending_start_action", 1))
+        _reset_start_tap_sequence()
+        if action == 2:
+            create_airblender_camera(scene, bpy.context)
+        elif action == 1:
+            switch_airblender_camera(scene, 1, bpy.context)
+        else:
+            delete_current_airblender_camera(scene, bpy.context)
 
 
 def create_or_switch_new_take_slot(scene):
@@ -1810,6 +1869,8 @@ def start_controller_flight(context, reporter=None):
     RUNTIME.bumper_tap_count = {}
     RUNTIME.pending_start_single = False
     RUNTIME.last_start_tap = -999.0
+    RUNTIME.start_tap_count = 0
+    RUNTIME.pending_start_action = 0
     RUNTIME.pending_select_single = False
     RUNTIME.last_select_tap = -999.0
     bpy.app.timers.register(_flight_timer_tick, first_interval=0.01, persistent=False)
@@ -2195,6 +2256,7 @@ def _is_primary_viewport_draw():
 CONTROL_HELP_LINES = (
     "Start/Menu: cycle cameras",
     "Start/Menu double-tap: create camera",
+    "Start/Menu triple-tap: delete current camera",
     "A: show/hide controls",
     "B: toggle third-person side pane",
     "R3: camera portrait/landscape",
@@ -2282,7 +2344,7 @@ def auto_arm_if_controller_present(context=None):
     configure_drone_split_view_layout(context)
     ok = start_controller_flight(context)
     if ok:
-        s.status = "AirBlender autosensed controller — Start cycles cameras, double-tap creates"
+        s.status = "AirBlender autosensed controller — Start: cycle / double-new / triple-delete"
     return ok
 
 
@@ -2339,7 +2401,7 @@ def _draw_controller_icon():
                 "A: hide controls",
                 "B: third-person side pane",
                 "R3: portrait/landscape",
-                "Start: cycle cameras; double-tap new camera",
+                "Start: cycle; double-tap new; triple-tap delete",
                 "Select: cycle takes; double-tap new/empty take",
                 "Y: invert right stick + roll + bumpers",
                 "X: speed low/medium/high/xhigh",
@@ -2439,7 +2501,7 @@ class DFR_PT_panel(bpy.types.Panel):
         col.label(text="Invert: " + joystick_invert_mode_label(s.joystick_invert_mode))
         col.label(text="D-pad Up = camera screenshot")
         col.label(text="D-pad Down = record / overwrite")
-        col.label(text="Start = cycle cameras; double-tap creates camera")
+        col.label(text="Start = cycle; double-tap creates; triple-tap deletes")
         col.label(text="Select = cycle takes; double-tap new/empty take")
         col.label(text="D-pad Left/Right = rewind/forward active take")
         if s.last_screenshot_path:

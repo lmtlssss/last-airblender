@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.4
+
+- Add Start/Menu triple-tap to safely delete the current camera while keeping AirBlender armed on the next usable camera.
+- Update the baked controls docs and in-Blender overlays for the single/double/triple Start camera fleet gestures.
+
 ## v1.0.3
 
 - Finalized the controller-first AirBlender flight workflow: A toggles the controller controls overlay, B toggles the third-person side pane, R3 toggles portrait/landscape, Select single-taps through takes and double-taps to a new/empty take, and Start cycles cameras in numeric order with a shorter double-tap window.
