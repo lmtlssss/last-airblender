@@ -1,20 +1,37 @@
-# The Last AirBlender
+# the last airblender
 
-Fly Blender's camera with an Xbox-style controller and record the take as animation.
+made with codex.
 
-**Made with Codex.**
+blender camera flight from an xbox controller.
+record the pass. scrub the take. overwrite the bad tail. save the frame.
+no cloud. no account. no weird launcher ritual.
 
-The Last AirBlender gives Blender a fast cinematic camera-flight mode: pick up a controller, fly the scene camera, record the move as keyframes, scrub/overwrite takes, and save camera screenshots beside your `.blend`.
+```text
+        ┌───────────────────────────────┐
+        │  the last airblender          │
+        ├───────────────────────────────┤
+        │  xbox controller              │
+        │        │                      │
+        │        ▼                      │
+        │  blender viewport             │
+        │        │                      │
+        │        ▼                      │
+        │  airblender camera rig        │
+        │        │                      │
+        │        ├── keyframed takes    │
+        │        └── png screenshots    │
+        └───────────────────────────────┘
+```
 
-## Install
+## install
 
-### Linux/macOS
+### linux / macos
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lmtlssss/The-Last-AirBlender/main/install.sh | sh
 ```
 
-Safer inspect-first path:
+inspect first if you want to see the wires:
 
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/lmtlssss/The-Last-AirBlender/main/install.sh
@@ -22,19 +39,19 @@ less install.sh
 sh install.sh
 ```
 
-Pin a version:
+pin a release:
 
 ```bash
 LAST_AIRBLENDER_VERSION=v1.0.4 sh install.sh
 ```
 
-### Windows PowerShell
+### windows powershell
 
 ```powershell
 irm https://raw.githubusercontent.com/lmtlssss/The-Last-AirBlender/main/install.ps1 | iex
 ```
 
-Inspect-first path:
+inspect first:
 
 ```powershell
 irm https://raw.githubusercontent.com/lmtlssss/The-Last-AirBlender/main/install.ps1 -OutFile install.ps1
@@ -42,115 +59,143 @@ notepad install.ps1
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-### Manual downloads
+### manual parts bin
 
-Download the latest native installer from GitHub Releases:
+pull the latest installer from github releases:
 
-- Ubuntu/Debian: `.deb`
-- Fedora/RHEL: `.rpm`
-- Windows: `.msi`
-- macOS: `.pkg`
-- Manual Blender add-on ZIP: `last-airblender-addon.zip`
+```text
+.deb                         ubuntu / debian
+.rpm                         fedora / rhel
+.msi                         windows
+.pkg                         macos
+last-airblender-addon.zip    manual blender add-on
+```
 
-## Quick start
+## runtime plate
 
-### Normal no-terminal Blender runtime
+open blender like normal.
+plug in an xbox controller.
+look for the small translucent **airblender** controller icon in the 3d viewport.
 
-After install, open Blender normally. A small translucent controller icon labeled **AirBlender** appears in the 3D viewport. If an Xbox-compatible controller is visible to Blender, AirBlender autosenses it and arms camera flight automatically.
+```text
+┌─ blender viewport ─────────────────────────────────────────┐
+│                                                           │
+│   [ airblender ]  left click  : arm / activate fallback    │
+│                  right click : native controls menu        │
+│                                                           │
+│   autosense finds the controller and arms the camera rig.  │
+└───────────────────────────────────────────────────────────┘
+```
 
-- **Autosense**: plugging in an Xbox-compatible controller, even mid-session, automatically activates The Last AirBlender, creates/attaches the camera rig, and switches to the split camera/third-person layout.
-- **Left-click the controller icon**: fallback manual activate if autosense has not armed yet.
-- **Right-click the controller icon**: show the native controls menu.
-- No terminal or background CLI is required for normal Blender use on systems where Blender can read the controller directly.
-
-The CLI is still useful for install, doctor, packaging, and optional bridge fallback:
+normal use does not need a terminal.
+the cli is for checks, packaging, and bridge fallback work:
 
 ```bash
 last-airblender doctor
-last-airblender launch your-scene.blend   # optional bridge launcher
+last-airblender launch your-scene.blend
 ```
 
-## Baked controls
+## controller map
 
-| Control | Action |
-|---|---|
-| Start/Menu | Cycle available AirBlender/scene cameras |
-| Start/Menu double-tap | Create a new `AirBlender_Cam_###` at the current flown/view transform |
-| Start/Menu triple-tap | Delete the current camera and stay armed on the next usable camera |
-| Left stick X | Strafe left/right |
-| Left stick Y | Move forward/back along camera view |
-| Right stick | Viewport-locked look |
-| RB / LB | Rise / fall at 75% left-stick movement speed |
-| RB / LB double-tap | Auto rise/fall |
-| RB / LB tap while auto | Reverse auto direction |
-| RT / LT | Camera roll |
-| L3 + RT/LT | Camera focal length |
-| X | Low / medium / high / xhigh speed |
-| Y | Invert right stick + trigger roll + bumper rise/fall direction |
-| A | Show/hide controls overlay |
-| B | Toggle third-person side pane |
-| R3 | Toggle camera portrait/landscape |
-| D-pad Up | Camera screenshot |
-| D-pad Down | Record / stop / overwrite from scrubbed frame |
-| D-pad Left/Right | Scrub active take backward/forward |
-| Select / Back | Cycle take slots 1-10 |
-| Select / Back double-tap | Jump to a new/empty take slot |
+```text
+┌────────────────────┬──────────────────────────────────────────────┐
+│ control            │ action                                       │
+├────────────────────┼──────────────────────────────────────────────┤
+│ start / menu       │ cycle airblender + scene cameras             │
+│ start double tap   │ create AirBlender_Cam_### at current view     │
+│ start triple tap   │ delete current camera, arm the next usable    │
+│ left stick x       │ strafe left / right                          │
+│ left stick y       │ move forward / back along camera view         │
+│ right stick        │ viewport-locked look                         │
+│ rb / lb            │ rise / fall at 75% left-stick speed           │
+│ rb / lb double tap │ auto rise / fall                             │
+│ rb / lb while auto │ reverse auto direction                       │
+│ rt / lt            │ camera roll                                  │
+│ l3 + rt / lt       │ focal length                                 │
+│ x                  │ speed: low / medium / high / xhigh           │
+│ y                  │ invert look, roll, and rise/fall             │
+│ a                  │ show / hide controls overlay                 │
+│ b                  │ toggle third-person side pane                │
+│ r3                 │ portrait / landscape camera frame            │
+│ d-pad up           │ screenshot                                   │
+│ d-pad down         │ record / stop / overwrite from scrub frame    │
+│ d-pad left/right   │ scrub active take backward / forward          │
+│ select / back      │ cycle take slots 1-10                        │
+│ select double tap  │ jump to new / empty take slot                 │
+└────────────────────┴──────────────────────────────────────────────┘
+```
 
-No remapping is required for normal use.
+no remapping required.
 
-## Recording workflow
+## take deck
 
-1. Open Blender normally with the controller plugged in; AirBlender autosenses it and arms itself.
-2. Use **Start/Menu double-tap** to create cameras, **single tap** to cycle existing cameras, or **triple tap** to delete the current camera.
-3. Fly until it feels right.
-4. Press **D-pad Down** to start recording.
-5. Fly the shot.
-6. Press **D-pad Down** again to stop.
-7. Use **D-pad Left/Right** to scrub the active take.
-8. If you scrub back and press **D-pad Down**, the future is trimmed and recording overwrites from that frame.
+```text
+01  plug in controller
+02  open blender
+03  airblender autosenses and arms
+04  start double tap        -> make camera
+05  fly the shot
+06  d-pad down              -> record
+07  fly the take
+08  d-pad down              -> stop
+09  d-pad left / right      -> scrub
+10  d-pad down after scrub  -> trim future + overwrite
+```
 
-## Screenshots
+## screenshots
 
-D-pad Up saves a camera-perspective PNG beside the saved project:
+press d-pad up.
+a camera-perspective png lands beside the saved `.blend`:
 
 ```text
 <your-blend-folder>/last_airblender_screenshots/
 ```
 
-## Naming and compatibility
+## scene names
 
-v1.0 uses canonical AirBlender names for new helpers:
+new v1.0 helpers use airblender names:
 
-- `AirBlender_Camera_Fleet`
-- `AirBlender_Airframe`
-- `AirBlender_Gimbal`
-- `AirBlender_Horizon`
-- `AirBlender_Cam_###`
-- `LAB_*` actions and markers
+```text
+AirBlender_Camera_Fleet
+AirBlender_Airframe
+AirBlender_Gimbal
+AirBlender_Horizon
+AirBlender_Cam_###
+LAB_* actions and markers
+```
 
-Older scenes using `Drone_Rig`, `Drone_Gimbal`, `Drone_Roll`, or `DFR_*` actions/markers remain supported for compatibility.
+old drone-flight scenes still load:
 
-## Troubleshooting
+```text
+Drone_Rig
+Drone_Gimbal
+Drone_Roll
+DFR_* actions and markers
+```
+
+## doctor
 
 ```bash
 last-airblender doctor
 ```
 
-Common issues:
+usual checks:
 
-- **Blender not found**: set `BLENDER=/path/to/blender`.
-- **Controller not detected**: plug in an Xbox-compatible controller and rerun `doctor`.
-- **Linux permissions**: install package normally and ensure your user can access game controllers.
-- **Windows SmartScreen/macOS Gatekeeper**: v1.0.4 packages may be unsigned; use the inspect-first install path if preferred.
+```text
+blender not found       set BLENDER=/path/to/blender
+controller not found    plug in the xbox controller and rerun doctor
+linux permissions       install normally; make sure game controllers are readable
+unsigned packages       v1.0.4 may trigger smartscreen / gatekeeper
+```
 
-## Developer build
+## dev bench
 
 ```bash
 cargo build --release
 scripts/package-deb.sh
 ```
 
-Run Blender smoke tests from a machine with Blender installed:
+blender smoke test, on a machine with blender installed:
 
 ```bash
 /snap/bin/blender --background --python tests/blender/smoke_dpad_scrub_after_stop.py
